@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instagram · Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafafa; --card-bg: #fff; --border: #dbdbdb;
+      --text: #262626; --subtext: #8e8e8e;
+      --blue: #0095f6; --fb-blue: #385185; --error: #ed4956;
+    }
+    body {
+      background: var(--bg);
+      font-family: 'Source Sans 3', sans-serif;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+      width: 100%; max-width: 350px;
+      animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 1px; width: 100%;
+      padding: 40px 40px 24px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .logo {
+      font-family: 'Grand Hotel', cursive; font-size: 2.2rem;
+      color: var(--text); margin-bottom: 28px;
+    }
+    .form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .input-field {
+      width: 100%; background: #fafafa;
+      border: 1px solid var(--border); border-radius: 3px;
+      padding: 9px 8px 7px; font-size: 0.75rem;
+      color: var(--text); outline: none;
+      transition: border-color 0.2s; font-family: inherit;
+    }
+    .input-field::placeholder { color: var(--subtext); }
+    .input-field:focus { border-color: #a8a8a8; background: #fff; }
+    .btn-login {
+      width: 100%; margin-top: 8px;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 0.875rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-login:hover { background: #1a8fe3; }
+    .btn-login:active { transform: scale(0.98); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+    .divider {
+      display: flex; align-items: center;
+      gap: 18px; width: 100%; margin: 18px 0 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .divider span { font-size: 0.8rem; font-weight: 600; color: var(--subtext); letter-spacing: 1px; }
+    .btn-facebook {
+      background: none; border: none; color: var(--fb-blue);
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      font-family: inherit; transition: color 0.2s; padding: 4px 0;
+    }
+    .btn-facebook:hover { color: #1a3a6e; }
+    .btn-forgot {
+      background: none; border: none; color: var(--subtext);
+      font-size: 0.75rem; cursor: pointer; font-family: inherit;
+      margin-top: 14px; transition: color 0.2s;
+    }
+    .btn-forgot:hover { color: var(--text); }
+    .card-signup {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 1px; width: 100%;
+      padding: 20px; text-align: center; font-size: 0.875rem; color: var(--text);
+    }
+    .btn-signup {
+      background: none; border: none; color: var(--blue);
+      font-weight: 600; font-size: 0.875rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-signup:hover { text-decoration: underline; }
+    .get-app { font-size: 0.875rem; color: var(--text); margin-top: 20px; }
+    .app-buttons { display: flex; gap: 8px; margin-top: 14px; justify-content: center; }
+    .app-btn {
+      background: #000; color: #fff; border: none;
+      border-radius: 8px; padding: 8px 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: background 0.2s; text-decoration: none;
+    }
+    .app-btn:hover { background: #222; }
+    .store-sub { font-size: 0.55rem; letter-spacing: 0.5px; }
+    .store-name { font-size: 0.8rem; font-weight: 700; }
+    .error-msg { font-size: 0.75rem; color: var(--error); margin-top: 2px; display: none; }
+    .error-msg.visible { display: block; }
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px;
+      padding: 32px 28px; max-width: 320px; width: 90%;
+      text-align: center;
+    }
+    .modal h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .modal p  { font-size: 0.85rem; color: var(--subtext); margin-bottom: 20px; line-height: 1.5; }
+    .modal-input {
+      width: 100%; border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px;
+      font-size: 0.85rem; outline: none;
+      margin-bottom: 10px; font-family: inherit;
+    }
+    .modal-input:focus { border-color: #a8a8a8; }
+    .modal-btn {
+      width: 100%; background: var(--blue); color: #fff;
+      border: none; border-radius: 8px; padding: 9px;
+      font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; margin-bottom: 10px;
+    }
+    .modal-btn:hover { background: #1a8fe3; }
+    .modal-cancel { background: none; border: none; color: var(--subtext); font-size: 0.85rem; cursor: pointer; font-family: inherit; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #333; color: #fff;
+      padding: 12px 24px; border-radius: 8px;
+      font-size: 0.85rem; z-index: 200;
+      transition: transform 0.3s ease; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="logo">Instagram</div>
+    <div class="form">
+      <input class="input-field" id="usernameInput" type="text" placeholder="Phone number, username, or email"/>
+      <input class="input-field" id="passwordInput" type="password" placeholder="Password"/>
+      <div class="error-msg" id="errorMsg">Please enter your username and password.</div>
+      <button class="btn-login" id="loginBtn" onclick="handleLogin()">Log In</button>
+      <div class="divider"><span>OR</span></div>
+      <button class="btn-facebook" onclick="showToast('Facebook login not available in demo.')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#385185">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+        Log in with Facebook
+      </button>
+      <button class="btn-forgot" onclick="openForgot()">Forgot password?</button>
+    </div>
+  </div>
+
+  <div class="card-signup">
+    Don't have an account? <button class="btn-signup" onclick="openSignup()">Sign up</button>
+  </div>
+
+  <p class="get-app">Get the app.</p>
+  <div class="app-buttons">
+    <a class="app-btn" href="https://apps.apple.com/app/instagram/id389801252" target="_blank">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+      </svg>
+      <div><div class="store-sub">Download on the</div><div class="store-name">App Store</div></div>
+    </a>
+    <a class="app-btn" href="https://play.google.com/store/apps/details?id=com.instagram.android" target="_blank">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+        <path d="M3.18 23.76c.28.16.6.19.92.08l12.79-7.38-2.87-2.87-10.84 10.17zM.47 1.48C.17 1.79 0 2.27 0 2.9v18.2c0 .63.17 1.11.47 1.42l.07.07 10.21-10.21v-.24L.54 1.41l-.07.07zM20.8 10.23l-2.73-1.58-3.19 3.19 3.19 3.19 2.75-1.59c.79-.45.79-1.18 0-1.63l-.02-.18zM3.18.24L15.97 7.62l-2.87 2.87L2.26.32c.27-.19.62-.19.92-.08z"/>
+      </svg>
+      <div><div class="store-sub">GET IT ON</div><div class="store-name">Google Play</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- Forgot Modal -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal">
+    <h3>Trouble logging in?</h3>
+    <p>Enter your email, phone, or username and we'll send you a link.</p>
+    <input class="modal-input" type="text" placeholder="Email, phone, or username"/>
+    <button class="modal-btn" onclick="closeModal('forgotModal'); showToast('Reset link sent! (Demo)')">Send login link</button>
+    <button class="modal-cancel" onclick="closeModal('forgotModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Sign Up Modal -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <h3>Create an account</h3>
+    <p>Sign up to see photos and videos from your friends.</p>
+    <input class="modal-input" id="su_email" type="text" placeholder="Mobile number or email"/>
+    <input class="modal-input" id="su_name" type="text" placeholder="Full name"/>
+    <input class="modal-input" id="su_username" type="text" placeholder="Username"/>
+    <input class="modal-input" id="su_password" type="password" placeholder="Password"/>
+    <button class="modal-btn" onclick="handleSignup()">Sign up</button>
+    <button class="modal-cancel" onclick="closeModal('signupModal')">Already have an account? Log in</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  function openForgot()  { document.getElementById('forgotModal').classList.add('open'); }
+  function openSignup()  { document.getElementById('signupModal').classList.add('open'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+
+  // ── Storage ──────────────────────────────────────────────────
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('ig_users') || '[]');
+  }
+
+  function saveUser(data) {
+    const users = getUsers();
+    const exists = users.find(u => u.username === data.username);
+    if (exists) return false;
+    users.push({ ...data, loginCount: 0, lastLogin: null, createdAt: new Date().toLocaleString() });
+    localStorage.setItem('ig_users', JSON.stringify(users));
+    return true;
+  }
+
+  function recordLogin(username) {
+    const users = getUsers();
+    const u = users.find(u => u.username === username);
+    if (u) {
+      u.loginCount = (u.loginCount || 0) + 1;
+      u.lastLogin = new Date().toLocaleString();
+      localStorage.setItem('ig_users', JSON.stringify(users));
+    }
+  }
+
+  function findUser(username, password) {
+    return getUsers().find(u => u.username === username && u.password === password);
+  }
+
+  // ── Login ────────────────────────────────────────────────────
+  function handleLogin() {
+    const u = document.getElementById('usernameInput').value.trim();
+    const p = document.getElementById('passwordInput').value.trim();
+    const err = document.getElementById('errorMsg');
+    if (!u || !p) { err.classList.add('visible'); return; }
+    err.classList.remove('visible');
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+
+    setTimeout(() => {
+      btn.disabled = false; btn.textContent = 'Log In';
+      const existing = findUser(u, p);
+      if (existing) {
+        recordLogin(u);
+        showToast(`✅ Welcome back, @${u}!`);
+        setTimeout(() => {
+          // Store currently logged-in user (session)
+          sessionStorage.setItem('ig_session', JSON.stringify({ username: u }));
+          window.location.href = 'admin.html';
+        }, 1000);
+      } else {
+        // Check if username exists with wrong password
+        const userExists = getUsers().find(u2 => u2.username === u);
+        if (userExists) {
+          err.textContent = 'Wrong password. Try again.';
+          err.classList.add('visible');
+        } else {
+          // New user — save and redirect
+          saveUser({ username: u, password: p, email: '', fullname: '' });
+          recordLogin(u);
+          showToast(`✅ Account created & logged in as @${u}`);
+          setTimeout(() => {
+            sessionStorage.setItem('ig_session', JSON.stringify({ username: u }));
+            window.location.href = 'admin.html';
+          }, 1000);
+        }
+      }
+    }, 1000);
+  }
+
+  // ── Sign Up ──────────────────────────────────────────────────
+  function handleSignup() {
+    const email    = document.getElementById('su_email').value.trim();
+    const fullname = document.getElementById('su_name').value.trim();
+    const username = document.getElementById('su_username').value.trim();
+    const password = document.getElementById('su_password').value.trim();
+
+    if (!username || !password) { showToast('⚠️ Username and password are required.'); return; }
+
+    const saved = saveUser({ username, password, email, fullname });
+    closeModal('signupModal');
+
+    if (saved) {
+      showToast(`✅ Account created! Now log in as @${username}`);
+      document.getElementById('usernameInput').value = username;
+    } else {
+      showToast(`ℹ️ @${username} already exists. Please log in.`);
+    }
+    ['su_email','su_name','su_username','su_password'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+</script>
+</body>
+</html>

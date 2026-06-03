@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instagram · Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafafa; --card: #fff; --border: #dbdbdb;
+      --text: #262626; --sub: #8e8e8e;
+      --blue: #0095f6; --red: #ed4956; --green: #2ecc71;
+    }
+    body {
+      background: var(--bg);
+      font-family: 'Source Sans 3', sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-logo {
+      font-family: 'Grand Hotel', cursive;
+      font-size: 1.6rem; color: var(--text);
+    }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .logged-in-badge {
+      background: #f0f7ff; border: 1px solid #bee3f8;
+      color: var(--blue); border-radius: 20px;
+      padding: 4px 14px; font-size: 0.82rem; font-weight: 600;
+    }
+    .btn-logout {
+      background: var(--red); color: #fff;
+      border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: #c0392b; }
+
+    /* ── Main ── */
+    .main { max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
+
+    .page-title {
+      font-size: 1.4rem; font-weight: 700; margin-bottom: 6px;
+    }
+    .page-sub { font-size: 0.875rem; color: var(--sub); margin-bottom: 28px; }
+
+    /* ── Stats ── */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 18px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--sub); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--text); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.green { color: var(--green); }
+
+    /* ── Table card ── */
+    .table-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-header h2 { font-size: 1rem; font-weight: 700; }
+    .btn-clear {
+      background: none; border: 1px solid var(--red);
+      color: var(--red); border-radius: 6px;
+      padding: 5px 14px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .btn-clear:hover { background: var(--red); color: #fff; }
+
+    .search-bar {
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+    }
+    .search-bar input {
+      width: 100%; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 0.85rem; outline: none; font-family: inherit;
+      background: var(--bg);
+    }
+    .search-bar input:focus { border-color: var(--blue); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    thead tr { background: #f9f9f9; border-bottom: 1px solid var(--border); }
+    th {
+      padding: 12px 16px; text-align: left;
+      color: var(--sub); font-weight: 600;
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    td { padding: 13px 16px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafffe; }
+
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .username-text { font-weight: 600; }
+    .fullname-text { font-size: 0.78rem; color: var(--sub); }
+
+    .badge {
+      display: inline-block; border-radius: 20px;
+      padding: 3px 10px; font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-active { background: #e8f8f0; color: #27ae60; }
+    .badge-you { background: #e8f0ff; color: var(--blue); }
+
+    .btn-delete {
+      background: none; border: none; color: #ccc;
+      cursor: pointer; font-size: 1rem; padding: 4px;
+      transition: color 0.2s;
+    }
+    .btn-delete:hover { color: var(--red); }
+
+    .empty-row td {
+      text-align: center; color: var(--sub);
+      padding: 40px; font-size: 0.9rem;
+    }
+
+    .table-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      font-size: 0.78rem; color: var(--sub);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #333; color: #fff;
+      padding: 12px 24px; border-radius: 8px;
+      font-size: 0.85rem; z-index: 200;
+      transition: transform 0.3s; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-logo">Instagram</div>
+  <div class="topbar-right">
+    <span class="logged-in-badge" id="sessionBadge">👤 Loading…</span>
+    <button class="btn-logout" onclick="logout()">Log Out</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="page-title">Admin Dashboard</div>
+  <div class="page-sub">All registered users stored in this browser session.</div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value blue" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Today</div>
+      <div class="stat-value green" id="statActive">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Your Logins</div>
+      <div class="stat-value" id="statMyLogins">0</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Registered Users</h2>
+      <button class="btn-clear" onclick="clearAll()">🗑 Clear All</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍  Search by username or email…" oninput="renderTable()"/>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Login Count</th>
+            <th>Last Login</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+    <div class="table-footer" id="tableFooter">Showing 0 users</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Session guard ──────────────────────────────────────────
+  const session = JSON.parse(sessionStorage.getItem('ig_session') || 'null');
+  if (!session) {
+    window.location.href = 'index.html';
+  } else {
+    document.getElementById('sessionBadge').textContent = `👤 @${session.username}`;
+  }
+
+  function logout() {
+    sessionStorage.removeItem('ig_session');
+    window.location.href = 'index.html';
+  }
+
+  // ── Storage helpers ────────────────────────────────────────
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('ig_users') || '[]');
+  }
+
+  function deleteUser(index) {
+    if (!confirm('Delete this user?')) return;
+    const users = getUsers();
+    const deleted = users.splice(index, 1)[0];
+    localStorage.setItem('ig_users', JSON.stringify(users));
+    showToast(`🗑 Deleted @${deleted.username}`);
+    renderTable();
+  }
+
+  function clearAll() {
+    if (!confirm('Delete ALL users? This cannot be undone.')) return;
+    localStorage.removeItem('ig_users');
+    showToast('All users cleared.');
+    renderTable();
+  }
+
+  // ── Render ─────────────────────────────────────────────────
+  function renderTable() {
+    const allUsers  = getUsers();
+    const query     = document.getElementById('searchInput').value.toLowerCase();
+    const filtered  = query
+      ? allUsers.filter(u => u.username.toLowerCase().includes(query) || (u.email||'').toLowerCase().includes(query))
+      : allUsers;
+
+    // Stats
+    const today = new Date().toLocaleDateString();
+    const activeToday = allUsers.filter(u => u.lastLogin && u.lastLogin.includes(today)).length;
+    const myData = allUsers.find(u => u.username === session?.username);
+
+    document.getElementById('statTotal').textContent    = allUsers.length;
+    document.getElementById('statActive').textContent   = activeToday;
+    document.getElementById('statMyLogins').textContent = myData?.loginCount || 0;
+
+    const tbody  = document.getElementById('userTableBody');
+    const footer = document.getElementById('tableFooter');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="9">${query ? 'No users match your search.' : 'No users registered yet.'}</td></tr>`;
+      footer.textContent = 'Showing 0 users';
+      return;
+    }
+
+    footer.textContent = `Showing ${filtered.length} of ${allUsers.length} user${allUsers.length !== 1 ? 's' : ''}`;
+
+    tbody.innerHTML = filtered.map((u, i) => {
+      const initial = u.username[0].toUpperCase();
+      const isYou   = u.username === session?.username;
+      const realIdx = allUsers.indexOf(u);
+      return `
+        <tr>
+          <td style="color:var(--sub)">${i + 1}</td>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">${initial}</div>
+              <div>
+                <div class="username-text">@${u.username}</div>
+                <div class="fullname-text">${u.fullname || '—'}</div>
+              </div>
+            </div>
+          </td>
+          <td>${u.email || '—'}</td>
+          <td><span id="pw-${realIdx}" style="font-family:monospace;font-size:0.8rem;color:var(--sub)">${maskPassword(u.password)}</span> <button onclick="togglePw(${realIdx}, this)" data-pass="${u.password}" style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:var(--blue);font-family:inherit;">Show</button></td>
+          <td style="text-align:center">${u.loginCount || 0}</td>
+          <td style="font-size:0.78rem;color:var(--sub)">${u.lastLogin || '—'}</td>
+          <td style="font-size:0.78rem;color:var(--sub)">${u.createdAt}</td>
+          <td>
+            ${isYou
+              ? '<span class="badge badge-you">You</span>'
+              : '<span class="badge badge-active">Active</span>'}
+          </td>
+          <td>
+            <button class="btn-delete" onclick="deleteUser(${realIdx})" title="Delete user">🗑</button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function maskPassword(pw) {
+    if (!pw) return '—';
+    return pw[0] + '•'.repeat(Math.max(pw.length - 2, 2)) + pw[pw.length - 1];
+  }
+
+  function togglePw(idx, btn) {
+    const span = document.getElementById('pw-' + idx);
+    const pw = btn.getAttribute('data-pass');
+    if (btn.textContent === 'Show') {
+      span.textContent = pw;
+      span.style.color = 'var(--text)';
+      btn.textContent = 'Hide';
+    } else {
+      span.textContent = maskPassword(pw);
+      span.style.color = 'var(--sub)';
+      btn.textContent = 'Show';
+    }
+  }
+
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  renderTable();
+</script>
+</body>
+</html>
